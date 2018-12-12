@@ -3,43 +3,26 @@
 # See http://www.sublimetext.com/docs/3/syntax.html
 name: CircleCI (Config)
 file_extensions:
-  - circleci/config # ~/.circleci/config
+  - /.circleci/config.yml   # ~/.circleci/config.yml
+  - /src/@orb.yml           # ~/src/@orb.yml
 
 first_line_match: '(?:^%CIIRCLE_CI( ?2.\d+)?|^version:( ?2.\d+)?)'
 scope: source.circleci
 variables:
-
 ##########################################################################
-# CircleCI Variables
+# Yaml Variables
 ##########################################################################
+  # General
+  s_separaor_line: '[ \t]+'
+  c_indicator: '[-?:,\[\]{}#&*!|>''"%@`]'
+  c_flow_indicator: '[\[\]{},]'
+  ns_word_char: '[[:word:]\-]'
+  ns_uri_char: '(?x: %[:xdigit:]{2} | [[:alnum:][:punct:]])'
   
-  top_level_property_names: (?:^|^-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  second_level_property_names: (?:^\s{2}|^\s{2}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  third_level_property_names: (?:^\s{4}|^\s{4}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  fourth_level_property_names: (?:^\s{6}|^\s{6}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  fifth_level_property_names: (?:^\s{8}|^\s{8}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  sixth_level_property_names: (?:^\s{10}|^\s{10}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  seventh_level_property_names: (?:^\s{12}|^\s{12}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  eighth_level_property_names: (?:^\s{14}|^\s{14}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  ninth_level_property_names: (?:^\s{16}|^\s{16}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  tenth_level_property_names: (?:^\s{18}|^\s{18}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  eleventh_level_property_names: (?:^\s{20}|^\s{20}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
-  twelveth_level_property_names: (?:^\s{22}|^\s{22}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  # Tag Stuff
+  c_tag_handle: (?:!(?:{{ns_word_char}}*!)?)
+  ns_tag_char: '(?x: %[:xdigit:]{2} | [[:alnum:][:punct:]])'
   
-  always_prop: always
-  on_failure_prop: on_failure
-  on_success_prop: on_success
-  on_warning_prop: on_warning
-  when_props: |-
-    (?x:
-      \b(
-          ({{on_failure_prop}})
-        | ({{on_warning_prop}})
-        | ({{on_success_prop}})
-        | ({{always_prop}})
-      )\b
-    )
-
   # patterns for plain scalars of implicit different types
   # (for the Core Schema: http://www.yaml.org/spec/1.2/spec.html#schema/core/)
   _type_null: (?i:null|~) # http://yaml.org/type/null.html
@@ -83,36 +66,70 @@ variables:
       | ({{_type_float}})
       | ({{_type_timestamp}})
     )
+
+#========================================================================#
+
+##########################################################################
+# CircleCI Variables
+##########################################################################
+  
+  top_level_property_names: (?:^|^-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  second_level_property_names: (?:^\s{2}|^\s{2}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  third_level_property_names: (?:^\s{4}|^\s{4}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  fourth_level_property_names: (?:^\s{6}|^\s{6}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  fifth_level_property_names: (?:^\s{8}|^\s{8}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  sixth_level_property_names: (?:^\s{10}|^\s{10}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  seventh_level_property_names: (?:^\s{12}|^\s{12}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  eighth_level_property_names: (?:^\s{14}|^\s{14}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  ninth_level_property_names: (?:^\s{16}|^\s{16}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  tenth_level_property_names: (?:^\s{18}|^\s{18}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  eleventh_level_property_names: (?:^\s{20}|^\s{20}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  twelveth_level_property_names: (?:^\s{22}|^\s{22}-\s)\b([[:alpha:][:alnum:]_\-]*)\b
+  
+  always_prop: always
+  on_failure_prop: on_failure
+  on_success_prop: on_success
+  on_warning_prop: on_warning
+  when_props: |-
+    (?x:
+      \b(
+          ({{on_failure_prop}})
+        | ({{on_warning_prop}})
+        | ({{on_success_prop}})
+        | ({{always_prop}})
+      )\b
+    )
+  shell_cmds: |-
+    (?x:
+        (echo|yarn|bundle|npm|yum|apt|wget|curl)
+    )
 #========================================================================#
 contexts:
 
 ##########################################################################
 # CircleCI Contexts
 ##########################################################################
-  prototype:    
-    # CircleCI Directive
-    - include: circleci_directive
+  prototype:
     # YAML
+    - include: circleci_directive
     - include: directive
     - include: document
     - include: aliases
     - include: property_merge
-    # Generics
-    - include: comments
-    - include: constants
-    - include: strings
     # CircleCI
     - include: circleci_templates
     - include: circleci_parameter_conditionals
     - include: circleci_parameter_types
     - include: circleci_parameters
-    - include: circleci_common_property_values
+    - include: cirlceci_shell_cmds
   
   main:
     # Yaml Inclusions
     
     - include: symbols
-    # Exclusive Inclusions
+    # CircleCI Inclusions
+    - include: circleci_parameter_types
+    - include: circleci_templates
     - include: properties
     
     # Generic Inclusions
@@ -120,9 +137,6 @@ contexts:
     - include: constants
     - include: strings
     # - include: symbols
-    
-    # CircleCI Inclusions
-    - include: circleci_templates
     
     # Color of unmatched text
     - match: '[[:alpha:][:alnum:]_\-\:]*'
@@ -140,7 +154,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.top-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # second level
@@ -150,7 +164,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.second-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # third level
@@ -160,7 +174,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.third-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # fourth level
@@ -170,7 +184,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.fourth-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # fifth level
@@ -180,7 +194,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.fifth-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # sixth level
@@ -190,7 +204,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.sixth-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # seventh level
@@ -200,7 +214,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.seventh-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # eighth level
@@ -210,7 +224,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.eighth-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # ninth level
@@ -220,7 +234,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.ninth-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # tenth level
@@ -230,7 +244,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.tenth-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # eleventh level
@@ -240,7 +254,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.eleventh-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
     # twelveth level
@@ -250,7 +264,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - meta_scope: meta.property-names.twelveth-level.circleci
-        - meta_content_scope: string.unquoted.property-names.value.circleci
+        - meta_content_scope: string.unquoted.circleci
         - meta_include_prototype: true
         - include: end_of_line
 #========================================================================#
@@ -422,7 +436,6 @@ contexts:
   
   # CircleCI Conditional Parameters Block
   # `<<# [parameter]>> [value] <</ [parameter] >>`
-  # FIXME: Breaks when it comes after a ``
   circleci_parameter_conditionals:
     - match: ^\s*(<<#\s*([[:alpha:]_\-]*)\s*>>)
       captures:
@@ -430,7 +443,7 @@ contexts:
         2: comment.parameters.param.name.circleci
       push:
         - meta_scope: string.unquoted.parameters.conditional.values.circleci
-        - match: ^\s*(<</\s*(\2)\s*>>)
+        - match: ^\s*(<</\s*([[:alpha:]_\-]*)\s*>>)
           captures:
             1: punctuation.definition.comment.parameters.conditional.block.tag.end.circleci
             2: comment.parameters.param.name.circleci
@@ -439,7 +452,7 @@ contexts:
   # CircleCI Parameter Types
   # `type: [string,boolean,integer,enum,executor,steps,env_var_name]`
   circleci_parameter_types:  
-    - match: '(?<=type: )\b(string|boolean|integer|enum|executor|steps|env_var_name)\b'
+    - match: '(?<=type: )\b(approval|string|boolean|integer|enum|executor|steps|env_var_name)\b'
       scope: support.type.parameters.types.circleci
   
   
@@ -448,8 +461,7 @@ contexts:
   circleci_common_property_values:
     - match: |-
         (?x:\b(
-            checkout
-          | on_(?:failure|success)
+            on_(?:failure|success)
           | always 
         )\b)
       captures:
@@ -484,4 +496,22 @@ contexts:
         - match: '(}})'
           scope: punctuation.definition.templates.tag.ouput.end.circleci
           pop: true
+  
+  # CircleCI Shell Tags
+  # 
+  circleci_shell_tags:
+    - match: '\$\{'
+      scope: punctuation.definition.shell.escape.tag.begin.circleci
+      push:
+        - match: '\b[[:upper:]_]*\b' 
+          scope: constant.language.env.variable.in-shell-tag.circleci
+        - match: '\}'
+          scope: punctuation.definition.shell.escape.tag.end.circleci
+          pop: true
+  
+  # CircleCI Shell Cmds
+  # `the (echo) in echo "this"`
+  cirlceci_shell_cmds:
+    - match: (?=run:|command:)\s*\b{{shell_cmds}}\b
+      scope: entity.name.function.destructor.shell.cmds.circleci
 #========================================================================#

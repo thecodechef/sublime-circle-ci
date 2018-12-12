@@ -1,23 +1,99 @@
 %CIRCLECI 2.1
 ---
-- &default
-<<: *defaults
-version: 2.1
-description: >
-  this is a description of this config file
-commands:
-  say_hello:
-    description: >
-      this is a description of this command `say_hello`
-    parameters:
-      image-name:
-        type: string
-        default: "node"
-      image-version:
-        type: integer
-        default: 10.14.1
+aliases:
+  
+  - &restore-repo-cache
+    restore_cache:
+      keys:
+        - v1-repo-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum ".git" }}
+  
+  - &restore-bundle-cache
+    restore_cache:
+      keys:
+        - v1-bundle-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "vendor/bundle" }}
+  
+  - &restore-yarn-cache
+    restore_cache:
+      keys:
+        - v1-yarn-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "yarn.lock" }}
+  
+  - &defaults
     docker:
-      - image: circleci/<<parameters.image-name>>:<<parameters.image-version>>
+      - image: circleci/node:10
+    working_directory: ~/sublime-circle-ci
+
+orbs:
+
+exectutors:
+
+jobs:
+  checkout_code:
+    <<: *defaults
     steps:
-      - run: {{ .BuildNum }}-{{ .Branch }}-{{ .Revision }}-{{ .Environment.VAR_NAME }}-{{ checksum ".git" }}
+      - checkout
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum ".git" }}
+          paths: ~/sublime-circle-ci  
+      - run:
+          name: Installing Dependencies from RubyGems
+          command: bundle install --path=vendor/bundle
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "vendor/bundle" }}
+          paths: vendor/bundle
+      - run:
+          name: Installing Dependencies from Npm
+          command: yarn install
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "yarn.lock" }}
+          paths: ~/.cache/yarn 
+
+  build:
+    <<: *defaults
+    steps:
+      - *restore-repo-cache
+      - *restore-bundle-cache
+      - *restore-yarn-cache
+      - run:
+          name: Building
+          command: |
+            yarn run build
+  test:
+    <<: *defaults
+    steps:
+      - *restore-repo-cache
+      - *restore-bundle-cache
+      - *restore-yarn-cache
+      - run:
+          name: Testing
+          command: |
+            yarn run test
+  deploy:
+    <<: *defaults
+    steps:
+      - *restore-repo-cache
+      - *restore-bundle-cache
+      - *restore-yarn-cache
+      - run:
+          name: Deploying
+          command: |
+            yarn run deploy
+workflows:
+  build_and_deploy:
+    jobs:
+      - checkout_code
+      - build:
+          requires:
+            - checkout_code
+      - test:
+          requires:
+            - build
+      - hold:
+          type: approval
+          requires:
+            - checkout_code
+            - build
+            - test
+      - deploy:
+          requires:
+            - hold
 ...
