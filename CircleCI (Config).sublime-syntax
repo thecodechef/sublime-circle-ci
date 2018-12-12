@@ -1,0 +1,234 @@
+%YAML 1.2
+---
+# See http://www.sublimetext.com/docs/3/syntax.html
+name: CircleCI (Config)
+file_extensions:
+  - yml # ~/.circleci/config.yml
+
+first_line_match: '(?:^%CIIRCLE_CI( ?2.\d+)?|^version:( ?2.\d+)?)'
+scope: source.yaml.circleci
+variables:
+  primary_properties: version|description|jobs|workflows|orbs|executers|
+  executor_properties: docker|machine|macos
+  docker_properties: image|name|entrypoint|command|user|environment|auth|aws_auth
+  machine_properties: enabled|image|docker_layer_caching
+  macos_properties: xcode
+  trigger_properties: schedule|cron
+  always_prop: always
+  on_failure_prop: on_failure
+  on_success_prop: on_success
+  on_warning_prop: on_warning
+  when_props: |-
+    (?x:
+      \b(
+          ({{on_failure_prop}})
+        | ({{on_warning_prop}})
+        | ({{on_success_prop}})
+        | ({{always_prop}})
+      )\b
+    )
+
+  # patterns for plain scalars of implicit different types
+  # (for the Core Schema: http://www.yaml.org/spec/1.2/spec.html#schema/core/)
+  _type_null: (?i:null|~) # http://yaml.org/type/null.html
+  _type_bool: |- # http://yaml.org/type/bool.html
+    (?xi:y|yes|n|no|true|false|on|off)
+  _type_int: |- # http://yaml.org/type/int.html
+    (?x:
+        [-+]? 0b [0-1_]+ # (base 2)
+      | [-+]? 0  [0-7_]+ # (base 8)
+      | [-+]? (?: 0|[1-9][0-9_]*) # (base 10)
+      | [-+]? 0x [0-9a-fA-F_]+ # (base 16)
+      | [-+]? [1-9] [0-9_]* (?: :[0-5]?[0-9])+ # (base 60)
+    )
+  _type_float: |- # http://yaml.org/type/float.html
+    (?x:
+        [-+]? (?: [0-9] [0-9_]*)? \. [0-9.]* (?: [eE] [-+] [0-9]+)? # (base 10)
+      | [-+]? [0-9] [0-9_]* (?: :[0-5]?[0-9])+ \. [0-9_]* # (base 60)
+      | [-+]? \. (?i: inf) # (infinity)
+      |       \. (?i: nan) # (not a number)
+    )
+  _type_timestamp: |- # http://yaml.org/type/timestamp.html
+    (?x:
+        \d{4} - \d{2} - \d{2}           # (y-m-d)
+      | \d{4}                           # (year)
+        - \d{1,2}                       # (month)
+        - \d{1,2}                       # (day)
+        (?: [Tt] | [ \t]+) \d{1,2}      # (hour)
+        : \d{2}                         # (minute)
+        : \d{2}                         # (second)
+        (?: \.\d*)?                     # (fraction)
+        (?:
+            (?:[ \t]*) Z
+          | [-+] \d{1,2} (?: :\d{1,2})?
+        )?                              # (time zone)
+    )
+  _type_all: |-
+    (?x:
+        ({{_type_null}})
+      | ({{_type_bool}})
+      | ({{_type_int}})
+      | ({{_type_float}})
+      | ({{_type_timestamp}})
+    )
+contexts:
+  prototype:
+    - include: comments
+    - include: constants
+    - include: symbols
+    - include: directive
+    - include: document
+    - include: template_tags
+    - include: template_vars
+  
+  main:
+    - match: '[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: keyword.control.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{2}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: support.type.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{4}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: entity.name.function.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{6}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: entity.name.tag.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{8}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: constant.language.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{10}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: support.class.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: when_props
+        - include: end_of_line
+    
+    - match: (?:\s*|\s*-\s*)(<<)(:)
+      captures:
+        1: keyword.control.property-names.merge-mapping.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: end_of_line
+    
+    - match: ^\s*(<<)(parameters(\.)([A-Za-z0-9\-_]*))(>>)
+      captures:
+        1: keyword.control.parameters.tag.begin.circleci
+        2: entity.name.function.parameters.circleci
+        3: punctuation.definition.generic.circleci
+        4: support.type.parameters.value.circleci 
+        5: keyword.control.parameters.tag.end.circleci
+      push:
+        - include: comments
+        - include: end_of_line
+    
+    - match: '.*'
+      scope: string.unquoted.circleci
+  
+  when_props:
+    - match: '\s*\b({{on_failure_prop}})|({{on_warning_prop}})|({{on_success_prop}})|({{always_prop}})\b'
+      captures:
+        1: entity.name.tag.on-failure.circleci
+        2: support.type.on-warning.circleci
+        3: string.unquoted.on-success.circleci
+        4: keyword.operator.word.always.circleci
+      push:
+        - include: end_of_line
+  
+  comments:
+    - match: | # l-comment
+        (?x)
+        (?: ^ [ \t]* | [ \t]+ )
+        (?=\#)
+      captures:
+      push:
+        - match: '#'
+          scope: punctuation.definition.comment.line.number-sign.yaml
+          set:
+          - meta_scope: comment.line.number-sign.yaml
+          - match: \n|\z
+            pop: true
+  
+  constants:
+    - match: \b{{_type_all}}\b
+      captures:
+        1: constant.language.null.circleci
+        2: constant.language.bool.circleci
+        3: constant.numeric.integer.circleci
+        4: constant.numeric.float.circleci
+        5: constant.numeric.timestamp.circleci
+  
+  # strings:
+  symbols:
+    - match: '>'
+      scope: meta.symbols.circleci punctuation.definition.caret.circleci
+    - match: ':'
+      scope: meta.symbols.circleci punctuation.definition.colon.circleci
+
+  directive:
+    - match: ^%
+      scope: meta.symbols.circleci punctuation.definition.percent.circleci
+      push:
+        - match: 'CIRCLECI'
+          scope: keyword.declaration.directive.circle-ci.circleci
+          push:
+            - include: constants
+            - match: $
+              pop: true
+        - match: $
+          pop: true
+  document:
+    - match: '---'
+      scope: meta.document.heading.circleci support.type.document.heading.begin.circleci
+    - match: '\.{3}'
+      scope: meta.document.heading.circleci support.type.document.heading.end.circleci
+  
+  end_of_line:
+    - match: '$'
+      scope: meta.symbols.circleci punctuation.definition.colon.circleci
+      pop: true
+  
+  template_tags:
+    - match: '{{'
+      scope: punctuation.definition.string.templates.tag.begin.circleci
+      set:
+        - include: template_vars
+        - match: '}}'
+          scope: punctuation.definition.string.templates.tag.begin.circleci
+          pop: true
+  
+  template_vars:
+    - match: (\.)([A-Z][a-z0-9\-]*)(\.)\b([A-Z_]*)\b
+      captures:
+        1: punctuation.definition.templates.variable.dot.circleci
+        2: constant.language.templates.variable.name.circleci
+        3: punctuation.definition.templates.variable.dot.circleci
+        4: support.type.templates.variable.name.circleci
+    - match: '(\.)\b([A-Z][a-z0-9\-]*)\b'
+      captures:
+        1: punctuation.definition.templates.variable.dot.circleci
+        2: support.type.templates.variable.name.circleci
+    - match: \bchecksum|epoch|arch\b
+      scope: keyword.declaration.templates.kwargs.circleci
+    - include: strings
