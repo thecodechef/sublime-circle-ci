@@ -82,46 +82,95 @@ contexts:
     - include: template_vars
   
   main:
-    - match: '[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+    - include: properties
+    - include: parameters
+    
+    - match: '.*'
+      scope: string.unquoted.circleci
+
+  properties:  
+    - match: '\s?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
       captures:
         1: keyword.control.property-names.circleci
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
+        - include: parameters
         - include: when_props
         - include: end_of_line
-    - match: '\s{2}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+    - match: '\s{2}\b([[:alpha:]_][[:alnum:]_]*)\b(:)|\s{2}-\s\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
       captures:
         1: support.type.property-names.circleci
         2: meta.symbols.circleci punctuation.definition.colon.circleci
+        3: support.type.property-names.circleci
+        4: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
+        - include: parameters
         - include: when_props
         - include: end_of_line
-    - match: '\s{4}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+    - match: '\s{4}\b([[:alpha:]_][[:alnum:]_]*)\b(:)|\s{4}-\s\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
       captures:
         1: entity.name.function.property-names.circleci
         2: meta.symbols.circleci punctuation.definition.colon.circleci
+        3: entity.name.function.property-names.circleci
+        4: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
+        - include: parameters
         - include: when_props
         - include: end_of_line
-    - match: '\s{6}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+    - match: '\s{6}\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
       captures:
         1: entity.name.tag.property-names.circleci
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
+        - include: parameters
         - include: when_props
         - include: end_of_line
-    - match: '\s{8}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+    - match: '\s{8}\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
       captures:
         1: constant.language.property-names.circleci
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
+        - include: parameters
         - include: when_props
         - include: end_of_line
-    - match: '\s{10}[-\s]?\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+    - match: '\s{10}\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
       captures:
         1: support.class.property-names.circleci
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
+        - include: parameters
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{12}\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: keyword.declaration.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: parameters
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{14}\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: support.type.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: parameters
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{16}\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: entity.name.function.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: parameters
+        - include: when_props
+        - include: end_of_line
+    - match: '\s{18}\b([[:alpha:]_][[:alnum:]_]*)\b(:)'
+      captures:
+        1: entity.name.tag.property-names.circleci
+        2: meta.symbols.circleci punctuation.definition.colon.circleci
+      push:
+        - include: parameters
         - include: when_props
         - include: end_of_line
     
@@ -131,7 +180,7 @@ contexts:
         2: meta.symbols.circleci punctuation.definition.colon.circleci
       push:
         - include: end_of_line
-    
+  parameters:
     - match: ^\s*(<<)(parameters(\.)([A-Za-z0-9\-_]*))(>>)
       captures:
         1: keyword.control.parameters.tag.begin.circleci
@@ -142,11 +191,9 @@ contexts:
       push:
         - include: comments
         - include: end_of_line
-    
-    - match: '.*'
-      scope: string.unquoted.circleci
   
   when_props:
+    # TODO: make match string more simple
     - match: '\s*\b({{on_failure_prop}})|({{on_warning_prop}})|({{on_success_prop}})|({{always_prop}})\b'
       captures:
         1: entity.name.tag.on-failure.circleci
@@ -179,7 +226,12 @@ contexts:
         4: constant.numeric.float.circleci
         5: constant.numeric.timestamp.circleci
   
-  # strings:
+  # TODO: add double quoted strings with `punctuation.definition.string.quoted.duoble.circleci`
+  # duoble_quoted_strings:
+  # TODO: add single quoted strings with `punctuation.definition.string.quoted.single.circleci`
+  # single_quoted_strings:
+  
+  # TODO: add more symbols with `meta.symbols.circleci punctuation.definition.[symbol].circleci`
   symbols:
     - match: '>'
       scope: meta.symbols.circleci punctuation.definition.caret.circleci
