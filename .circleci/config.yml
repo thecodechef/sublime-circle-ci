@@ -47,53 +47,53 @@ jobs:
           key: v1-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "yarn.lock" }}
           paths: ~/.cache/yarn 
 
-  build:
-    <<: *defaults
-    steps:
-      - *restore-repo-cache
-      - *restore-bundle-cache
-      - *restore-yarn-cache
-      - run:
-          name: Building
-          command: |
-            yarn run build
-  test:
-    <<: *defaults
-    steps:
-      - *restore-repo-cache
-      - *restore-bundle-cache
-      - *restore-yarn-cache
-      - run:
-          name: Testing
-          command: |
-            yarn run test
-  deploy:
-    <<: *defaults
-    steps:
-      - *restore-repo-cache
-      - *restore-bundle-cache
-      - *restore-yarn-cache
-      - run:
-          name: Deploying
-          command: |
-            yarn run deploy
+  # build:
+  #   <<: *defaults
+  #   steps:
+  #     - *restore-repo-cache
+  #     - *restore-bundle-cache
+  #     - *restore-yarn-cache
+  #     - run:
+  #         name: Building
+  #         command: |
+  #           yarn run build
+  # test:
+  #   <<: *defaults
+  #   steps:
+  #     - *restore-repo-cache
+  #     - *restore-bundle-cache
+  #     - *restore-yarn-cache
+  #     - run:
+  #         name: Testing
+  #         command: |
+  #           yarn run test
+  # deploy:
+  #   <<: *defaults
+  #   steps:
+  #     - *restore-repo-cache
+  #     - *restore-bundle-cache
+  #     - *restore-yarn-cache
+  #     - run:
+  #         name: Deploying
+  #         command: |
+  #           yarn run deploy
 workflows:
   build_and_deploy:
     jobs:
       - checkout_code
-      - build:
-          requires:
-            - checkout_code
-      - test:
-          requires:
-            - build
-      - hold:
-          type: approval
-          requires:
-            - checkout_code
-            - build
-            - test
-      - deploy:
-          requires:
-            - hold
+      # - build:
+      #    requires:
+      #      - checkout_code
+      # - test:
+      #    requires:
+      #      - build
+      # - hold:
+      #    type: approval
+      #    requires:
+      #      - checkout_code
+      #      - build
+      #      - test
+      # - deploy:
+      #    requires:
+      #    - hold
 ...

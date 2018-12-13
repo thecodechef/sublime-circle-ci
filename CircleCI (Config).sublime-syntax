@@ -7,7 +7,7 @@ file_extensions:
   - /src/@orb.yml           # ~/src/@orb.yml
 
 first_line_match: '(?:^%CIIRCLE_CI( ?2.\d+)?|^version:( ?2.\d+)?)'
-scope: source.circleci
+scope: source.yaml.circleci
 variables:
 ##########################################################################
 # Yaml Variables
