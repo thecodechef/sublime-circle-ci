@@ -78,6 +78,7 @@ jobs:
   #         command: |
   #           yarn run deploy
 workflows:
+  version: 2.1
   build_and_deploy:
     jobs:
       - checkout_code
