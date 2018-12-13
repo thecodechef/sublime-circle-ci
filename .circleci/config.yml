@@ -1,27 +1,28 @@
 %CIRCLECI 2.1
 ---
 version: 2.1
-aliases:
-  - &defaults
+jobs:
+  checkout_gems:
     docker:
       - image: circleci/ruby:2.5.3
-      - image: circleci/node:10
     working_directory: ~/sublime-circle-ci
-
-jobs:
-  checkout_code:
-    <<: *defaults
     steps:
       - checkout
       - run:
           name: Installing Dependencies from RubyGems
           command: bundle install
+  checkout_yarn:
+    docker:
+      - image: circleci/node:10
+    working_directory: ~/sublime-circle-ci
+    steps:
       - run:
-          name: Installing Dependencies from Npm
+          name: Installing Dependencies from Yarn
           command: yarn install
 workflows:
   version: 2.1
   checkout_code:
     jobs:
-      - checkout_code
+      - checkout_gems
+      - checkout_yarn
 ...
