@@ -30,6 +30,7 @@ end
 group :automation do 
 	gem "danger"
 	gem "guard"
+	gem "bundler"
 	gem "rake"
 end
 

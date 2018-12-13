@@ -20,10 +20,6 @@ aliases:
       - image: circleci/ruby:2.5
     working_directory: ~/sublime-circle-ci
 
-orbs:
-
-exectutors:
-
 jobs:
   checkout_code:
     <<: *defaults
