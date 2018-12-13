@@ -2,18 +2,6 @@
 ---
 version: 2.1
 aliases:
-  - &restore-repo-cache
-    restore_cache:
-      keys:
-        - v1-repo-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum ".git" }}
-  - &restore-bundle-cache
-    restore_cache:
-      keys:
-        - v1-bundle-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "vendor/bundle" }}
-  - &restore-yarn-cache
-    restore_cache:
-      keys:
-        - v1-yarn-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "yarn.lock" }}
   - &defaults
     docker:
       - image: circleci/ruby:2.5.3
