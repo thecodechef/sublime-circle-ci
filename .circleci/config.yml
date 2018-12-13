@@ -16,7 +16,8 @@ aliases:
         - v1-yarn-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "yarn.lock" }}
   - &defaults
     docker:
-      - image: circleci/ruby-node
+      - image: circleci/ruby:2.5.3
+      - image: circleci/node:10
     working_directory: ~/sublime-circle-ci
 
 jobs:
