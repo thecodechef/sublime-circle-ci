@@ -16,24 +16,26 @@ aliases:
         - v1-yarn-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "yarn.lock" }}
   - &defaults
     docker:
-      - image: circleci/node:10
-      - image: circleci/ruby:2.5
+      - image: circleci/ruby-node
     working_directory: ~/sublime-circle-ci
 
 jobs:
   checkout_code:
     <<: *defaults
     steps:
+      - *restore-repo-cache
       - checkout
       - save_cache:
           key: v1-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum ".git" }}
           paths: ~/sublime-circle-ci  
+      - *restore-bundle-cache
       - run:
           name: Installing Dependencies from RubyGems
           command: bundle install --path=vendor/bundle
       - save_cache:
           key: v1-{{ .Branch }}-{{ .Environment.VERSION }}-{{ .Revision }}-{{ checksum "vendor/bundle" }}
           paths: vendor/bundle
+      - *restore-yarn-cache
       - run:
           name: Installing Dependencies from Npm
           command: yarn install
